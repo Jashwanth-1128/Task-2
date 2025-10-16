@@ -1,212 +1,243 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Simple Calculator</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Simple Stopwatch</title>
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: gray;
-      color: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
+    /* ===== General Styling ===== */
+    :root{
+      font-family: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      color:#111;
     }
 
-    .calculator {
-      width: 320px;
-      background-color: whitesmoke;
-      border-radius: 10px;
-      padding: 15px;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
-    }
-.display {
-      background-color: #111;
-      padding: 10px;
-      border-radius: 6px;
-      text-align: right;
-      margin-bottom: 20px;
-    }
-    
-    .expression {
-      font-size: 16px;
-      color: #bbb;
-      margin-bottom: 4px;
+    body{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:100vh;
+      margin:0;
+      background: linear-gradient(135deg, #89f7fe, #66a6ff); /* soft blue gradient */
     }
 
-    .result {
-      font-size: 20px;
-      color: #fff;
-      font-weight: bold;
+    .wrap{
+      background:#fff;
+      padding:28px;
+      border-radius:14px;
+      box-shadow:0 6px 18px rgba(0,0,0,0.1);
+      width:340px;
+      text-align:center;
     }
 
-    .pad {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
+    h1{
+      font-size:26px;
+      margin-bottom:10px;
+      color:#333;
+      letter-spacing:1px;
     }
 
-    button.key {
-      font-size: 16px;
-      height: 50px;
-      border: white;
-      border-radius: 7px;
-      cursor: pointer;
-      background-color: #111;
-      color: #fff;
-      transition: 0.2s;
+    .time{
+      font-size:38px;
+      font-weight:700;
+      letter-spacing:1px;
+      margin:10px 0;
+      color:#222;
     }
 
-    button.key:hover {
-      background-color: #555;
-      color: #4fc3f7;
+    .sub{
+      font-size:14px;
+      color:#666;
+      margin-bottom:18px;
     }
 
-    button.op {
-      color: #4fc3f7;
+    .buttons{
+      display:flex;
+      gap:10px;
+      justify-content:center;
+      margin-bottom:14px;
     }
 
-    button.eq {
-      grid-column: span 2;
-      background-color: #4fc3f7;
-      color: #000;
-      font-weight: bold;
+    button{
+      padding:8px 14px;
+      border-radius:8px;
+      border:none;
+      background:#66a6ff;
+      color:#fff;
+      cursor:pointer;
+      font-weight:500;
+      transition: all 0.25s ease;
     }
 
-    button.clear {
-      background-color: #e53935;
-      color: #fff;
+    button:hover:not(:disabled){
+      background:#558ee8;
+      transform:scale(1.05);
     }
 
-    .footer {
-      margin-top: 10px;
-      font-size: 12px;
-      text-align: center;
-      color: #999;
+    button:disabled{
+      opacity:0.5;
+      cursor:not-allowed;
+    }
+
+    .laps{
+      max-height:140px;
+      overflow:auto;
+      border-top:1px solid #eee;
+      padding-top:8px;
+    }
+
+    .lap{
+      display:flex;
+      justify-content:space-between;
+      padding:6px 4px;
+      font-size:14px;
+      border-radius:4px;
+      background:#f9f9f9;
+      margin-bottom:4px;
+    }
+
+    .hint{
+      font-size:12px;
+      color:#888;
+      margin-top:10px;
     }
   </style>
 </head>
 <body>
-  <div class="calculator">
-    <div class="display">
-      <div class="expression" id="expression">0</div>
-      <div class="result" id="result">0</div>
+  <div class="wrap" id="app" aria-live="polite">
+    <h1>⏱ Simple Stopwatch</h1>
+    
+    <div class="time" id="time">00:00:00</div>
+    <div class="sub" id="sub">Ready</div>
+
+    <div class="buttons" role="group" aria-label="controls">
+      <button id="start">Start</button>
+      <button id="stop" disabled>Stop</button>
+      <button id="lap" disabled>Lap</button>
+      <button id="reset" disabled>Reset</button>
     </div>
 
-    <div class="pad" id="pad">
-      <button class="key clear" data-action="clear">AC</button>
-      <button class="key" data-action="back">⌫</button>
-      <button class="key" data-value="%">%</button>
-      <button class="key op" data-value="/">÷</button>
-
-      <button class="key" data-value="7">7</button>
-      <button class="key" data-value="8">8</button>
-      <button class="key" data-value="9">9</button>
-      <button class="key op" data-value="*">×</button>
-
-      <button class="key" data-value="4">4</button>
-      <button class="key" data-value="5">5</button>
-      <button class="key" data-value="6">6</button>
-      <button class="key op" data-value="-">−</button>
-
-      <button class="key" data-value="1">1</button>
-      <button class="key" data-value="2">2</button>
-      <button class="key" data-value="3">3</button>
-      <button class="key op" data-value="+">+</button>
-
-      <button class="key" data-value="0" style="grid-column: span 2;">0</button>
-      <button class="key" data-value=".">.</button>
-      <button class="key eq" data-action="equals">=</button>
+    <div class="laps" id="laps" aria-live="polite">
+      <div style="color:#999;text-align:center">No laps yet</div>
     </div>
 
-    <div class="footer">Use keyboard or buttons to calculate</div>
+    <div class="hint">Space = Start/Stop • L = Lap • R = Reset</div>
   </div>
 
-  <script>
-    const expressionEl = document.getElementById('expression');
-    const resultEl = document.getElementById('result');
-    const pad = document.getElementById('pad');
+<script>
+(function(){
+  const startBtn = document.getElementById('start');
+  const stopBtn  = document.getElementById('stop');
+  const lapBtn   = document.getElementById('lap');
+  const resetBtn = document.getElementById('reset');
+  const timeEl   = document.getElementById('time');
+  const subEl    = document.getElementById('sub');
+  const lapsEl   = document.getElementById('laps');
 
-    let expr = '';
-    let lastEval = null;
+  let running = false;
+  let startTs = 0;
+  let elapsed = 0;
+  let raf = null;
+  let laps = [];
 
-    function render() {
-      expressionEl.textContent = expr || '0';
-      resultEl.textContent = (lastEval === null) ? '0' : String(lastEval);
+  function pad(n, d=2){ return String(n).padStart(d,'0'); }
+
+  function format(ms){
+    const totalSec = Math.floor(ms / 1000);
+    const hrs = Math.floor(totalSec / 3600);
+    const mins = Math.floor((totalSec % 3600) / 60);
+    const secs = totalSec % 60;
+    return `${pad(hrs)}:${pad(mins)}:${pad(secs)}`;
+  }
+
+  function update(now){
+    const cur = elapsed + (running ? (now - startTs) : 0);
+    timeEl.textContent = format(cur);
+    subEl.textContent = running ? 'Running' : (elapsed ? 'Paused' : 'Ready');
+    if (running) raf = requestAnimationFrame(update);
+  }
+
+  function start(){
+    if (running) return;
+    running = true;
+    startTs = performance.now();
+    startBtn.textContent = 'Running';
+    stopBtn.disabled = false;
+    lapBtn.disabled = false;
+    resetBtn.disabled = false;
+    raf = requestAnimationFrame(update);
+  }
+
+  function stop(){
+    if (!running) return;
+    running = false;
+    const now = performance.now();
+    elapsed += now - startTs;
+    startTs = 0;
+    startBtn.textContent = 'Start';
+    if (raf) cancelAnimationFrame(raf);
+    update(performance.now());
+  }
+
+  function reset(){
+    running = false;
+    startTs = 0;
+    elapsed = 0;
+    laps = [];
+    if (raf) cancelAnimationFrame(raf);
+    timeEl.textContent = '00:00:00';
+    subEl.textContent = 'Ready';
+    startBtn.textContent = 'Start';
+    stopBtn.disabled = true;
+    lapBtn.disabled = true;
+    resetBtn.disabled = true;
+    renderLaps();
+  }
+
+  function lap(){
+    const now = performance.now();
+    const cur = elapsed + (running ? (now - startTs) : 0);
+    laps.unshift({ idx: laps.length + 1, ms: Math.floor(cur) });
+    renderLaps();
+  }
+
+  function renderLaps(){
+    lapsEl.innerHTML = '';
+    if (!laps.length){
+      const d = document.createElement('div');
+      d.style.color = '#999';
+      d.style.textAlign = 'center';
+      d.textContent = 'No laps yet';
+      lapsEl.appendChild(d);
+      return;
     }
-
-    function clearAll() {
-      expr = '';
-      lastEval = null;
-      render();
-    }
-
-    function backspace() {
-      expr = expr.slice(0, -1);
-      render();
-    }
-
-    function appendValue(v) {
-      expr += v;
-      render();
-    }
-
-    const ops = {
-      '+': (a, b) => a + b,
-      '-': (a, b) => a - b,
-      '*': (a, b) => a * b,
-      '/': (a, b) => a / b,
-      '%': (a, b) => a % b
-    };
-
-    function evaluateExpression(e) {
-      try {
-        const result = Function('return ' + e.replace(/÷/g, '/').replace(/×/g, '*'))();
-        return result;
-      } catch {
-        throw new Error('Invalid Expression');
-      }
-    }
-
-    function evaluateAndShow() {
-      try {
-        if (!expr) return;
-        const value = evaluateExpression(expr);
-        lastEval = Number.isFinite(value) ? value : 'Error';
-        expr = String(lastEval);
-        render();
-      } catch (err) {
-        resultEl.textContent = 'Error';
-      }
-    }
-
-    pad.addEventListener('click', (e) => {
-      const btn = e.target.closest('button');
-      if (!btn) return;
-      const v = btn.dataset.value;
-      const action = btn.dataset.action;
-
-      if (action === 'clear') return clearAll();
-      if (action === 'back') return backspace();
-      if (action === 'equals') return evaluateAndShow();
-      if (v !== undefined) return appendValue(v);
+    laps.forEach(l => {
+      const row = document.createElement('div');
+      row.className = 'lap';
+      const left = document.createElement('div');
+      left.textContent = `Lap ${l.idx}`;
+      const right = document.createElement('div');
+      right.textContent = format(l.ms);
+      row.appendChild(left);
+      row.appendChild(right);
+      lapsEl.appendChild(row);
     });
+  }
 
-    window.addEventListener('keydown', (e) => {
-      const allowed = '0123456789+-*/%.()';
-      if (allowed.includes(e.key)) {
-        appendValue(e.key);
-        return;
-      }
-      if (e.key === 'Enter') evaluateAndShow();
-      if (e.key === 'Backspace') backspace();
-      if (e.key === 'Escape') clearAll();
-    });
+  // Events
+  startBtn.addEventListener('click', ()=> running ? stop() : start());
+  stopBtn.addEventListener('click', stop);
+  resetBtn.addEventListener('click', reset);
+  lapBtn.addEventListener('click', lap);
 
-    render();
-  </script>
+  window.addEventListener('keydown', e => {
+    if (e.code === 'Space') { e.preventDefault(); running ? stop() : start(); }
+    if (e.key.toLowerCase() === 'r') reset();
+    if (e.key.toLowerCase() === 'l') { if (!lapBtn.disabled) lap(); }
+  });
+
+  // Initial render
+  renderLaps();
+})();
+</script>
 </body>
 </html>
